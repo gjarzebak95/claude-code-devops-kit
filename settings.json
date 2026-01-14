@@ -1,0 +1,27 @@
+{
+  "$schema": "https://claude.ai/code/settings-schema.json",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "pattern": "\\.tf$",
+        "command": "bash hooks/post-tool-use/tf-validate.sh \"$FILE\""
+      }
+    ]
+  },
+  "skills": {
+    "directory": "skills",
+    "enabled": [
+      "tf-plan",
+      "tf-apply",
+      "tf-validate",
+      "tf-pr",
+      "tf-import"
+    ]
+  },
+  "continuity": {
+    "ledgers_dir": "thoughts/ledgers",
+    "handoffs_dir": "thoughts/shared/handoffs",
+    "auto_create_handoff": true
+  }
+}
