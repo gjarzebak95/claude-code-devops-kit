@@ -1,93 +1,61 @@
-# Claude Code Configuration
+# Claude Code DevOps Kit
 
-Custom skills, hooks, and continuity system for terraform workflows.
+Skills, hooks, and MCP patterns for DevOps workflows with Claude Code. Terraform, Kubernetes, IAM, incident response, and CI/CD — with safety guardrails built in.
 
-Inspired by [Continuous-Claude-v3](https://github.com/parcadei/Continuous-Claude-v3).
+## Quick Start
 
-## Skills
-
-| Skill | Trigger | Description |
-|-------|---------|-------------|
-| `/tf-plan` | `terraform plan` | Run plan with formatted output |
-| `/tf-apply` | `terraform apply` | Apply with safety checks |
-| `/tf-validate` | `validate terraform` | Format + validate |
-| `/tf-pr` | `create terraform pr` | PR with plan summary |
-| `/tf-import` | `terraform import` | Import existing resources |
-
-## Hooks
-
-### PostToolUse
-- **tf-validate.sh**: Auto-format and validate after .tf file edits
-
-### PreCommit
-- **tf-check.sh**: Block commits with invalid terraform
-
-## Setup
-
-### Option 1: Symlink to ~/.claude
 ```bash
+# Option 1: Symlink into your Claude Code config
 ln -s $(pwd)/skills ~/.claude/skills
 ln -s $(pwd)/hooks ~/.claude/hooks
-ln -s $(pwd)/settings.json ~/.claude/settings.json
-```
 
-### Option 2: Copy to project
-```bash
+# Option 2: Copy into a project
 cp -r skills/ your-project/.claude/skills/
 cp -r hooks/ your-project/.claude/hooks/
 ```
 
-## Continuity System
+## Skills
 
-### Ledgers
-Track within-session progress in `thoughts/ledgers/CONTINUITY_*.md`:
+| Skill | Trigger | What it does |
+|-------|---------|-------------|
+| `tf-plan` | `/tf-plan` | Run terraform plan with formatted change summary |
+| `tf-apply` | `/tf-apply` | Apply with safety checks and confirmation |
+| `tf-validate` | `/tf-validate` | Format + validate terraform configuration |
+| `tf-pr` | `/tf-pr` | Generate PR description from terraform changes |
+| `tf-import` | `/tf-import` | Import existing resources into state |
+| `k8s-manifest-review` | `/k8s-review` | Review K8s manifests against production baseline |
+| `iam-least-privilege` | `/iam-audit` | Audit IAM policies for overly broad permissions |
+| `incident-runbook` | `/incident` | Generate structured incident response from alert |
+| `pr-description` | `/pr-desc` | Generate PR description from diff |
 
-```markdown
-## Goal
-Implement VPC module with proper subnets
+## Hooks
 
-## Completed
-- [x] Created VPC resource
-- [x] Added public subnets
+| Hook | Type | What it does |
+|------|------|-------------|
+| `dangerous-apply-guard` | PreToolUse | Blocks `terraform apply`/`kubectl apply` on production contexts |
+| `secret-scanner` | PreCommit | Scans staged files for AWS keys, tokens, private keys |
+| `conventional-commits` | PreCommit | Enforces `type(scope): description` commit format |
+| `tf-validate` | PostToolUse | Auto-formats and validates `.tf` files after edits |
+| `tf-check` | PreCommit | Blocks commits with invalid terraform |
 
-## In Progress
-- [ ] Add private subnets
-- [ ] Configure NAT gateway
-```
+## MCP Integration
 
-### Handoffs
-Transfer knowledge between sessions in `thoughts/shared/handoffs/<date>.yaml`:
+See `mcp/mcp-config-example.json` for GitHub + AWS tool integration setup.
 
-```yaml
-session_id: 2025-01-14-terraform-vpc
-completed:
-  - VPC module scaffolding
-  - Public subnet configuration
-next_steps:
-  - Add private subnets
-  - Configure route tables
-decisions:
-  - Using 3 AZs for high availability
-  - CIDR: 10.0.0.0/16
-blockers: []
-```
-
-## Directory Structure
+## Structure
 
 ```
-claude-code-config/
-├── skills/
-│   ├── tf-plan/SKILL.md
-│   ├── tf-apply/SKILL.md
-│   ├── tf-validate/SKILL.md
-│   ├── tf-pr/SKILL.md
-│   └── tf-import/SKILL.md
-├── hooks/
-│   ├── post-tool-use/tf-validate.sh
-│   └── pre-commit/tf-check.sh
-├── thoughts/
-│   ├── ledgers/
-│   └── shared/handoffs/
-├── settings.json
-└── README.md
+skills/           9 DevOps skills (5 Terraform + 4 general)
+hooks/            5 safety hooks (pre-commit, pre-tool-use, post-tool-use)
+mcp/              MCP server configuration examples
+docs/             Architecture diagram and decision records
 ```
+
+## Documentation
+
+- [Architecture](docs/architecture.md) — how skills, hooks, and MCP compose
+- [Decisions](docs/DECISIONS.md) — why these specific tools and patterns
+
+## License
+
+Apache-2.0
