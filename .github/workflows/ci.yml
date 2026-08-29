@@ -1,0 +1,39 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint YAML files
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: .
+          config_data: |
+            extends: default
+            rules:
+              line-length:
+                max: 120
+              truthy:
+                check-keys: false
+
+      - name: Shellcheck hooks
+        run: |
+          find hooks/ -name '*.sh' -exec shellcheck {} +
+
+      - name: Validate skill frontmatter
+        run: |
+          for skill in skills/*/SKILL.md; do
+            if ! head -1 "$skill" | grep -q '^---$'; then
+              echo "FAIL: $skill missing YAML frontmatter"
+              exit 1
+            fi
+            echo "OK: $skill"
+          done
